@@ -9,7 +9,7 @@ from sqlalchemy import func, select
 from app.database import Base, SessionLocal, engine
 from app.models import Item
 
-from app.views import items_router, auth_router
+from app.routers import items_router, auth_router
 
 
 SEED_ITEMS = [
