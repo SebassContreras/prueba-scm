@@ -9,6 +9,9 @@ from app.database import Base
 class Item(Base):
     __tablename__ = "items"
 
+    __filterable_fields__ = {"id", "sku",
+                             "status", "warehouse_id", "created_at"}
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sku: Mapped[str] = mapped_column(String(64), index=True)
     status: Mapped[str] = mapped_column(String(32), index=True)

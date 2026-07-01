@@ -1,9 +1,8 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,22 +13,9 @@ from app.auth import (
 from app.database import get_session
 from app.services import apply_filters
 from app.models import Item
+from app.schemas import ItemOut, SearchRequest
 
 router = APIRouter(prefix="/items", tags=["items"])
-
-
-class SearchRequest(BaseModel):
-    # TODO (candidato): diseña aquí el contrato de filtros estructurados.
-    filters: str | None = None
-
-
-class ItemOut(BaseModel):
-    id: int
-    sku: str
-    status: str
-    warehouse_id: int
-
-    model_config = {"from_attributes": True}
 
 
 @router.post("/search")
@@ -38,10 +24,13 @@ async def search_items(
     session: Annotated[AsyncSession, Depends(get_session)],
     _user: Annotated[str, Depends(get_current_user)],
 ) -> list[ItemOut]:
-    stmt = select(Item)
-    stmt = apply_filters(stmt, payload.filters)
-    result = await session.execute(stmt)
-    return [ItemOut.model_validate(i) for i in result.scalars().all()]
+    try:
+        stmt = select(Item)
+        stmt = apply_filters(stmt, payload.filters)
+        result = await session.execute(stmt)
+        return [ItemOut.model_validate(i) for i in result.scalars().all()]
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.patch("/{item_id}/status/{new_status}")
