@@ -12,7 +12,7 @@ from app.auth import (
     get_current_user,
 )
 from app.database import get_session
-from app.filters import apply_filters
+from app.services import apply_filters
 from app.models import Item
 
 router = APIRouter(prefix="/items", tags=["items"])
