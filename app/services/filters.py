@@ -14,7 +14,7 @@ def apply_filters(stmt, filters: List[Filter] | None):
     max_filters = len(allowed_fields)
     if len(filters) > max_filters:
         raise ValueError(
-            f"Máximo {max_filters} filtros permitidos.")
+            "Se excede el número máximo de filtros permitidos.")
 
     operators = {
         "=": lambda col, val: col == val,
