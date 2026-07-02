@@ -24,6 +24,12 @@ function statusLabel(status: string): string {
   return labels[status] ?? status;
 }
 
+function formatCreatedAt(value: string | null | undefined): string {
+  if (!value) return "Sin fecha";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "Sin fecha" : date.toLocaleString();
+}
+
 function buildFilters(): Filter[] {
   const filters: Filter[] = [];
   if (statusFilter.value) {
@@ -164,7 +170,7 @@ async function handleStatusChange(item: Item, newStatus: string) {
           <td>{{ item.sku }}</td>
           <td>{{ statusLabel(item.status) }}</td>
           <td>{{ item.warehouse_id }}</td>
-          <td>{{ new Date(item.created_at).toLocaleString() }}</td>
+          <td>{{ formatCreatedAt(item.created_at) }}</td>
           <td>
             <select
               :value="item.status"
