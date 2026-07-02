@@ -29,11 +29,13 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
             headers.set('Authorization', `Bearer ${localStorage.getItem('access_token')}`)
             return request<T>(path, { ...options, headers })
         }
+
+        throw new Error('Sesión expirada')
     }
 
     if (!response.ok) {
         const errorBody = await response.json().catch(() => null)
-        throw new Error(errorBody?.detail ?? `Request failed: ${response.status}`)
+        throw new Error(errorBody?.detail ?? `No pudimos completar la solicitud (${response.status}).`)
     }
 
     if (response.status === 204) return null as T

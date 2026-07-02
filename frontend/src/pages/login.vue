@@ -18,7 +18,9 @@ async function handleSubmit() {
     });
   } catch (error) {
     errorMessage.value =
-      error instanceof Error ? error.message : "Login failed";
+      error instanceof Error
+        ? error.message
+        : "No pudimos iniciar sesión. Revisa tus datos e inténtalo de nuevo.";
   } finally {
     isSubmitting.value = false;
   }
@@ -28,7 +30,7 @@ async function handleSubmit() {
 <template>
   <form @submit.prevent="handleSubmit">
     <div>
-      <label for="username">Username</label>
+      <label for="username">Usuario</label>
       <input
         id="username"
         v-model="username"
@@ -39,7 +41,7 @@ async function handleSubmit() {
     </div>
 
     <div>
-      <label for="password">Password</label>
+      <label for="password">Contraseña</label>
       <input
         id="password"
         v-model="password"
@@ -52,7 +54,7 @@ async function handleSubmit() {
     <p v-if="errorMessage">{{ errorMessage }}</p>
 
     <button type="submit" :disabled="isSubmitting">
-      {{ isSubmitting ? "Signing in..." : "Sign in" }}
+      {{ isSubmitting ? "Ingresando..." : "Iniciar sesión" }}
     </button>
   </form>
 </template>

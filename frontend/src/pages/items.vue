@@ -14,6 +14,16 @@ const hasSearched = ref(false);
 const statusFilter = ref("");
 const warehouseFilter = ref("");
 
+function statusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    pending: "Pendiente",
+    active: "Activo",
+    shipped: "Enviado",
+    cancelled: "Cancelado",
+  };
+  return labels[status] ?? status;
+}
+
 function buildFilters(): Filter[] {
   const filters: Filter[] = [];
   if (statusFilter.value) {
@@ -43,7 +53,11 @@ async function handleSearch() {
   } catch (error) {
     // http.ts throws this specific message when the token is missing/expired
     // and the refresh attempt also failed.
-    if (error instanceof Error && error.message === "Session expired") {
+    if (
+      error instanceof Error &&
+      (error.message === "Session expired" ||
+        error.message === "Sesión expirada")
+    ) {
       authStore.logout();
       return;
     }
@@ -51,7 +65,7 @@ async function handleSearch() {
     errorMessage.value =
       error instanceof Error
         ? error.message
-        : "Something went wrong while loading items";
+        : "No pudimos cargar los productos. Inténtalo de nuevo.";
   } finally {
     isLoading.value = false;
   }
@@ -73,59 +87,64 @@ async function handleStatusChange(item: Item, newStatus: string) {
     const index = items.value.findIndex((i) => i.id === updated.id);
     if (index !== -1) items.value[index] = updated;
   } catch (error) {
-    if (error instanceof Error && error.message === "Session expired") {
+    if (
+      error instanceof Error &&
+      (error.message === "Session expired" ||
+        error.message === "Sesión expirada")
+    ) {
       authStore.logout();
       return;
     }
 
     errorMessage.value =
-      error instanceof Error ? error.message : "Failed to update item status";
+      error instanceof Error
+        ? error.message
+        : "No pudimos actualizar el estado del producto.";
   } finally {
     updatingId.value = null;
   }
 }
-
 </script>
 
 <template>
   <div>
     <div class="header">
-      <h1>Items</h1>
+      <h1>Productos</h1>
     </div>
 
     <div class="filters">
       <label>
-        Status
+        Estado
         <select v-model="statusFilter">
-          <option value="">All</option>
-          <option value="pending">pending</option>
-          <option value="active">active</option>
-          <option value="shipped">shipped</option>
-          <option value="cancelled">cancelled</option>
+          <option value="">Todos</option>
+          <option value="pending">Pendiente</option>
+          <option value="active">Activo</option>
+          <option value="shipped">Enviado</option>
+          <option value="cancelled">Cancelado</option>
         </select>
       </label>
 
       <label>
-        Warehouse ID
-        <input v-model="warehouseFilter" type="number" placeholder="e.g. 3" />
+        ID de almacén
+        <input v-model="warehouseFilter" type="number" placeholder="p. ej. 3" />
       </label>
 
       <button type="button" :disabled="isLoading" @click="handleSearch">
-        {{ isLoading ? "Searching..." : "Buscar items" }}
+        {{ isLoading ? "Buscando..." : "Buscar productos" }}
       </button>
     </div>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 
     <p v-if="!hasSearched && !isLoading">
-      Click "Buscar items" to load results.
+      Cuando quieras, pulsa "Buscar productos" para ver resultados.
     </p>
     <p
       v-else-if="
         !isLoading && hasSearched && items.length === 0 && !errorMessage
       "
     >
-      No items found.
+      No encontramos productos con esos filtros.
     </p>
 
     <table v-if="items.length > 0">
@@ -133,9 +152,9 @@ async function handleStatusChange(item: Item, newStatus: string) {
         <tr>
           <th>ID</th>
           <th>SKU</th>
-          <th>Status</th>
-          <th>Warehouse</th>
-          <th>Created At</th>
+          <th>Estado</th>
+          <th>Almacén</th>
+          <th>Creado el</th>
           <th></th>
         </tr>
       </thead>
@@ -143,7 +162,7 @@ async function handleStatusChange(item: Item, newStatus: string) {
         <tr v-for="item in items" :key="item.id">
           <td>{{ item.id }}</td>
           <td>{{ item.sku }}</td>
-          <td>{{ item.status }}</td>
+          <td>{{ statusLabel(item.status) }}</td>
           <td>{{ item.warehouse_id }}</td>
           <td>{{ new Date(item.created_at).toLocaleString() }}</td>
           <td>
@@ -157,10 +176,10 @@ async function handleStatusChange(item: Item, newStatus: string) {
                 )
               "
             >
-              <option value="pending">pending</option>
-              <option value="active">active</option>
-              <option value="shipped">shipped</option>
-              <option value="cancelled">cancelled</option>
+              <option value="pending">Pendiente</option>
+              <option value="active">Activo</option>
+              <option value="shipped">Enviado</option>
+              <option value="cancelled">Cancelado</option>
             </select>
           </td>
         </tr>
