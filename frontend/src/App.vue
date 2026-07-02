@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import LoginForm from "./components/login-form.vue";
+import { authStore } from "./features/auth/store";
+import Login from "./pages/login.vue";
+import ItemsPage from "./pages/items.vue";
 </script>
 
 <template>
-  <LoginForm />
+  <Login v-if="!authStore.state.isAuthenticated" />
+  <ItemsPage v-else />
 </template>

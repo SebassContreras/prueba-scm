@@ -3,8 +3,8 @@ import type { LoginRequest, TokenPair } from './types'
 
 
 const ENDPOINTS = {
-    login: '/auth/login/',
-    refresh: '/auth/refresh/',
+    login: '/auth/login',
+    refresh: '/auth/refresh',
 } as const
 
 
