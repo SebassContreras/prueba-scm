@@ -1,8 +1,8 @@
-import { http, setRefreshHandler } from '../api/http'
+import { http, setRefreshHandler } from '../../api/http'
 import type { LoginRequest, TokenPair } from './types'
 
 
-export const ENDPOINTS = {
+const ENDPOINTS = {
     login: '/auth/login/',
     refresh: '/auth/refresh/',
 } as const
